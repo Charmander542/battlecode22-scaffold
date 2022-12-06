@@ -1,11 +1,11 @@
-package camel_case_v25_final.robot.droid;
+package bettermaybe.robot.droid;
 
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
-import camel_case_v25_final.dijkstra.Dijkstra20;
+import bettermaybe.dijkstra.Dijkstra20;
 
 public class Soldier extends Droid {
     public Soldier(RobotController rc) {

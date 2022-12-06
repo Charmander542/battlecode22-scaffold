@@ -1,9 +1,9 @@
-package camel_case_v25_final.robot.droid;
+package bettermaybe.robot.droid;
 
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 import battlecode.common.RobotType;
-import camel_case_v25_final.dijkstra.Dijkstra20;
+import bettermaybe.dijkstra.Dijkstra20;
 
 public class Sage extends Droid {
     public Sage(RobotController rc) {

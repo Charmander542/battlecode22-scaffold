@@ -1,4 +1,4 @@
-package camel_case_v25_final.util;
+package bettermaybe.util;
 
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;

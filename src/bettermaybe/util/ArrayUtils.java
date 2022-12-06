@@ -1,4 +1,4 @@
-package camel_case_v25_final.util;
+package bettermaybe.util;
 
 public class ArrayUtils {
     public static <T> T[] shuffle(T[] array) {

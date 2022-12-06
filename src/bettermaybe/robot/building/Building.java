@@ -1,10 +1,10 @@
-package camel_case_v25_final.robot.building;
+package bettermaybe.robot.building;
 
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 import battlecode.common.RobotType;
-import camel_case_v25_final.dijkstra.Dijkstra;
-import camel_case_v25_final.robot.Robot;
+import bettermaybe.dijkstra.Dijkstra;
+import bettermaybe.robot.Robot;
 
 public abstract class Building extends Robot {
     public Building(RobotController rc, RobotType type, Dijkstra dijkstra) {

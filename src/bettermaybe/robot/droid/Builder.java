@@ -1,4 +1,4 @@
-package camel_case_v25_final.robot.droid;
+package bettermaybe.robot.droid;
 
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -7,15 +7,12 @@ import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotMode;
 import battlecode.common.RobotType;
-import camel_case_v25_final.dijkstra.Dijkstra20;
+import bettermaybe.dijkstra.Dijkstra20;
 
 public class Builder extends Droid {
     private MapLocation archonLocation = null;
 
-    private boolean isLaboratoryBuilder = false;
     private MapLocation borderLocation = null;
-    private int labsBuilt = 0;
-    private int labStartRound = 0;
 
     public Builder(RobotController rc) {
         super(rc, RobotType.BUILDER, new Dijkstra20(rc));
@@ -32,12 +29,59 @@ public class Builder extends Droid {
             return;
         }
 
+        if (borderLocation == null) {
+            MapLocation myLocation = rc.getLocation();
+            MapLocation center = new MapLocation(mapWidth / 2, mapHeight / 2);
+
+            /*switch (directionBetween(center, myLocation)) {
+                case NORTHEAST:
+                    borderLocation = new MapLocation(mapWidth - 1, mapHeight - 1);
+                    break;
+                case SOUTHEAST:
+                    borderLocation = new MapLocation(mapWidth - 1, 0);
+                    break;
+                case SOUTHWEST:
+                    borderLocation = new MapLocation(0, 0);
+                    break;
+                case NORTHWEST:
+                default:
+                    borderLocation = new MapLocation(0, mapHeight - 1);
+            }*/
+
+            switch (center.directionTo(myLocation)) {
+                case NORTH:
+                    borderLocation = new MapLocation(mapWidth / 2, mapHeight - 1);
+                    break;
+                case NORTHEAST:
+                    borderLocation = new MapLocation(mapWidth - 1, mapHeight - 1);
+                    break;
+                case EAST:
+                    borderLocation = new MapLocation(mapWidth - 1, mapHeight / 2);
+                    break;
+                case SOUTHEAST:
+                    borderLocation = new MapLocation(mapWidth - 1, 0);
+                    break;
+                case SOUTH:
+                    borderLocation = new MapLocation(mapWidth / 2, 0);
+                    break;
+                case SOUTHWEST:
+                    borderLocation = new MapLocation(0, 0);
+                    break;
+                case WEST:
+                    borderLocation = new MapLocation(0, mapHeight / 2);
+                    break;
+                case NORTHWEST:
+                default:
+                    borderLocation = new MapLocation(0, mapHeight - 1);
+            }
+        }
+
         runWatchtowerBuilder();
     }
 
     private void runWatchtowerBuilder() throws GameActionException {
-        if (!rc.isActionReady() || rc.getTeamLeadAmount(myTeam) < 300 || rc.getRoundNum() < 100) {
-            tryWander();
+        if (!rc.isActionReady() || rc.getTeamLeadAmount(myTeam) < 150 || rc.getRoundNum() < 100) {
+            tryMoveToArchon();
             return;
         }
 
@@ -85,7 +129,7 @@ public class Builder extends Droid {
             rc.buildRobot(RobotType.WATCHTOWER, bestDirection);
         }
 
-        tryWander();
+        tryMoveToArchon();
     }
 
     private boolean tryRepair(MapLocation location) throws GameActionException {

@@ -1,15 +1,15 @@
-package camel_case_v25_final;
+package bettermaybe;
 
 import battlecode.common.Clock;
 import battlecode.common.RobotController;
-import camel_case_v25_final.robot.Robot;
-import camel_case_v25_final.robot.building.Archon;
-import camel_case_v25_final.robot.building.Laboratory;
-import camel_case_v25_final.robot.building.Watchtower;
-import camel_case_v25_final.robot.droid.Builder;
-import camel_case_v25_final.robot.droid.Miner;
-import camel_case_v25_final.robot.droid.Sage;
-import camel_case_v25_final.robot.droid.Soldier;
+import bettermaybe.robot.Robot;
+import bettermaybe.robot.building.Archon;
+import bettermaybe.robot.building.Laboratory;
+import bettermaybe.robot.building.Watchtower;
+import bettermaybe.robot.droid.Builder;
+import bettermaybe.robot.droid.Miner;
+import bettermaybe.robot.droid.Sage;
+import bettermaybe.robot.droid.Soldier;
 
 @SuppressWarnings("unused")
 public class RobotPlayer {

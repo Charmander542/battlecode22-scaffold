@@ -11,6 +11,7 @@ import bettermaybe.dijkstra.Dijkstra20;
 
 public class Builder extends Droid {
     private MapLocation archonLocation = null;
+    private boolean isLaboratoryBuilder = false;
 
     private MapLocation borderLocation = null;
 
@@ -23,6 +24,14 @@ public class Builder extends Droid {
         super.run();
 
         lookForDangerTargets();
+
+        if (!isLaboratoryBuilder) {
+            isLaboratoryBuilder = !sharedArray.laboratoryBuilderAlive();
+        }
+
+        if (isLaboratoryBuilder) {
+            sharedArray.markLaboratoryBuilderAlive();
+        }
 
 
         if (tryRepairNearby()) {
@@ -80,16 +89,15 @@ public class Builder extends Droid {
     }
 
     private void runWatchtowerBuilder() throws GameActionException {
-        if (!rc.isActionReady() || rc.getTeamLeadAmount(myTeam) < 150 || rc.getRoundNum() < 100) {
-            tryMoveToArchon();
-            return;
-        }
-
         if (archonLocation == null) {
             archonLocation = getClosestArchon();
             if (archonLocation == null) {
                 return;
             }
+        }
+        if (!rc.isActionReady() || rc.getLocation().distanceSquaredTo(archonLocation) > 3) {
+            tryMoveToArchon();
+            return;
         }
 
         for (Direction direction : adjacentDirections) {
@@ -100,6 +108,7 @@ public class Builder extends Droid {
 
             RobotInfo robot = rc.senseRobotAtLocation(location);
             if (robot != null && robot.team == myTeam && robot.mode == RobotMode.PROTOTYPE) {
+                System.out.println("Fixing");
                 tryRepair(robot.location);
                 return;
             }
@@ -107,6 +116,7 @@ public class Builder extends Droid {
 
         Direction bestDirection = null;
         int minDistance = Integer.MAX_VALUE;
+        //System.out.println("I'm Here" + rc.getTeamLeadAmount(myTeam));
 
         for (Direction direction : adjacentDirections) {
             if (!rc.canBuildRobot(RobotType.WATCHTOWER, direction)) {
@@ -127,6 +137,8 @@ public class Builder extends Droid {
 
         if (bestDirection != null) {
             rc.buildRobot(RobotType.WATCHTOWER, bestDirection);
+        }else{
+            sharedArray.markBuilderNeedsResources();
         }
 
         tryMoveToArchon();

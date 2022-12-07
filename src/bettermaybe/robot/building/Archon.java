@@ -64,7 +64,7 @@ public class Archon extends Building {
                 setPossibleEnemyArchonLocations();
             }
 
-            maxLeadingMiners = Math.max(rc.senseNearbyLocationsWithLead(2).length, 5);
+            maxLeadingMiners = Math.max(rc.senseNearbyLocationsWithLead(2).length, 8);
 
             isFirstRun = false;
         }
@@ -75,15 +75,6 @@ public class Archon extends Building {
 
         lookForDangerTargets();
 
-        if (rc.getMode() == RobotMode.PORTABLE) {
-            if (getAttackTarget(me.visionRadiusSquared) != null) {
-                tryTransform();
-            } else {
-                tryMoveToOptimalLocation();
-            }
-
-            return;
-        }
 
         boolean checkForInitialOptimalLocation = false;
         if (!hasFoundInitialOptimalLocation) {
@@ -98,14 +89,13 @@ public class Archon extends Building {
             findOptimalLocation();
         }
 
-        if (getAttackTarget(me.visionRadiusSquared) != null) {
+        if (getAttackTarget(me.visionRadiusSquared) != null && rc.getTeamLeadAmount(myTeam) > 150) {
             tryBuildRobot(RobotType.SOLDIER);
             tryRepair();
             return;
         }
 
         if (rc.getRoundNum() > 1 && !RandomUtils.chance(((double) turnIndex + 1) / (double) archonCount)) {
-            tryMoveToOptimalLocation();
             tryRepair();
             return;
         }
@@ -118,7 +108,7 @@ public class Archon extends Building {
             }
         }
 
-        if (!hasDangerTargets && minersSpawned < maxLeadingMiners) {
+        if (sharedArray.laboratoryBuilderAlive() && !hasDangerTargets && minersSpawned < maxLeadingMiners) {
             if (tryBuildRobot(RobotType.MINER)) {
                 minersSpawned++;
             }
@@ -128,16 +118,16 @@ public class Archon extends Building {
         }
 
         if (rc.getTeamLeadAmount(myTeam) < 300) {
-            while (spawnOrder[spawnOrderIndex] == RobotType.MINER) {
+            while (spawnOrder[spawnOrderIndex] == RobotType.BUILDER && (turnIndex != 0 || sharedArray.laboratoryBuilderAlive())) {
                 spawnOrderIndex = (spawnOrderIndex + 1) % spawnOrder.length;
             }
         }
-
+        if(!sharedArray.builderNeedsResources()){
         if (tryBuildRobot(spawnOrder[spawnOrderIndex])) {
             spawnOrderIndex = (spawnOrderIndex + 1) % spawnOrder.length;
         }
+    }
 
-        tryMoveToOptimalLocation();
         tryRepair();
     }
 
@@ -273,26 +263,6 @@ public class Archon extends Building {
         }
 
         return false;
-    }
-
-    private void tryMoveToOptimalLocation() throws GameActionException {
-        if (optimalLocation == null) {
-            return;
-        }
-
-        if (rc.getLocation().equals(optimalLocation)) {
-            if (rc.getMode() == RobotMode.PORTABLE) {
-                tryTransform();
-            }
-        } else {
-            if (rc.getMode() == RobotMode.PORTABLE) {
-                tryMoveTo(optimalLocation);
-                sharedArray.setMyArchonLocation(sharedArray.archonIdToIndex(rc.getID()), rc.getLocation());
-                setSpawnDirections();
-            } else {
-                tryTransform();
-            }
-        }
     }
 
     private double getSpawnRubble(MapLocation location) throws GameActionException {

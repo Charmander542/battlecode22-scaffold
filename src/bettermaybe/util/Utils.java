@@ -4,12 +4,12 @@ import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 
-public class SharedArray {
+public class Utils {
     public static final int MAX_DANGER_TARGETS = 20;
 
     private RobotController rc;
 
-    public SharedArray(RobotController rc) {
+    public Utils(RobotController rc) {
         this.rc = rc;
     }
 
@@ -60,7 +60,7 @@ public class SharedArray {
     }
 
     public void addDangerTarget(MapLocation location, int expiration) throws GameActionException {
-        for (int i = 0; i < SharedArray.MAX_DANGER_TARGETS; i++) {
+        for (int i = 0; i < Utils.MAX_DANGER_TARGETS; i++) {
             MapLocation dangerTarget = getDangerTarget(i);
             if (dangerTarget == null || dangerTarget.equals(location)) {
                 write(i + 26, locationToInt(location) + expiration * 5_000);
@@ -149,5 +149,41 @@ public class SharedArray {
         if (rc.readSharedArray(index) != newValue) {
             rc.writeSharedArray(index, newValue);
         }
+    }
+
+    public static int nextInt(int maxExclusive) {
+        return (int) Math.floor(Math.random() * maxExclusive);
+    }
+
+    public static int nextInt(int minInclusive, int maxExclusive) {
+        return nextInt(maxExclusive - minInclusive) + minInclusive;
+    }
+
+    public static boolean chance(double percentage) {
+        return nextInt(1000) < percentage * 1000;
+    }
+
+    public static <T> T[] shuffle(T[] array) {
+        for (int i = array.length - 1; i > 0; i--) {
+            int index = Utils.nextInt(i + 1);
+
+            T temp = array[index];
+            array[index] = array[i];
+            array[i] = temp;
+        }
+
+        return array;
+    }
+
+    public static int[] shuffle(int[] array) {
+        for (int i = array.length - 1; i > 0; i--) {
+            int index = Utils.nextInt(i + 1);
+
+            int temp = array[index];
+            array[index] = array[i];
+            array[i] = temp;
+        }
+
+        return array;
     }
 }

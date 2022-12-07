@@ -10,8 +10,7 @@ import battlecode.common.RobotInfo;
 import battlecode.common.RobotMode;
 import battlecode.common.RobotType;
 import bettermaybe.dijkstra.Dijkstra34;
-import bettermaybe.util.RandomUtils;
-import bettermaybe.util.SharedArray;
+import bettermaybe.util.Utils;
 
 public class Archon extends Building {
     private Direction[] spawnDirections;
@@ -95,13 +94,13 @@ public class Archon extends Building {
             return;
         }
 
-        if (rc.getRoundNum() > 1 && !RandomUtils.chance(((double) turnIndex + 1) / (double) archonCount)) {
+        if (rc.getRoundNum() > 1 && !Utils.chance(((double) turnIndex + 1) / (double) archonCount)) {
             tryRepair();
             return;
         }
 
         boolean hasDangerTargets = false;
-        for (int i = 0; i < SharedArray.MAX_DANGER_TARGETS; i++) {
+        for (int i = 0; i < Utils.MAX_DANGER_TARGETS; i++) {
             if (sharedArray.getDangerTarget(i) != null) {
                 hasDangerTargets = true;
                 break;

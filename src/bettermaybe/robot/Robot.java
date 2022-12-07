@@ -8,9 +8,7 @@ import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
 import bettermaybe.dijkstra.Dijkstra;
-import bettermaybe.util.ArrayUtils;
-import bettermaybe.util.RandomUtils;
-import bettermaybe.util.SharedArray;
+import bettermaybe.util.Utils;
 
 public abstract class Robot {
     protected RobotController rc;
@@ -22,7 +20,7 @@ public abstract class Robot {
     protected int mapWidth;
     protected int mapHeight;
 
-    protected SharedArray sharedArray;
+    protected Utils sharedArray;
 
     private Dijkstra dijkstra;
 
@@ -65,7 +63,7 @@ public abstract class Robot {
         mapWidth = rc.getMapWidth();
         mapHeight = rc.getMapHeight();
 
-        sharedArray = new SharedArray(rc);
+        sharedArray = new Utils(rc);
 
         this.dijkstra = dijkstra;
     }
@@ -317,7 +315,7 @@ public abstract class Robot {
     }
 
     protected boolean tryMoveRandom() throws GameActionException {
-        for (Direction direction : ArrayUtils.shuffle(adjacentDirections.clone())) {
+        for (Direction direction : Utils.shuffle(adjacentDirections.clone())) {
             if (tryMove(direction)) {
                 return true;
             }
@@ -328,7 +326,7 @@ public abstract class Robot {
 
     protected boolean tryWander() throws GameActionException {
         if (wanderQuadrants == null) {
-            wanderQuadrants = ArrayUtils.shuffle(new Direction[]{
+            wanderQuadrants = Utils.shuffle(new Direction[]{
                     Direction.NORTHEAST,
                     Direction.NORTHWEST,
                     Direction.SOUTHEAST,
@@ -373,7 +371,7 @@ public abstract class Robot {
                     break;
             }
 
-            currentWanderTarget = new MapLocation(RandomUtils.nextInt(minX, maxX), RandomUtils.nextInt(minY, maxY));
+            currentWanderTarget = new MapLocation(Utils.nextInt(minX, maxX), Utils.nextInt(minY, maxY));
             return tryWander();
         }
 

@@ -111,8 +111,8 @@ public class Archon extends Building {
                     knownArchonLocations++;
                 }
             }
-            if(knownArchonLocations>1){
-                isMoving = true;
+            if(knownArchonLocations==1){
+                isSoldierSpawner = true;
             }
 
             if (knownArchonLocations == rc.getArchonCount()) {
@@ -158,7 +158,7 @@ public class Archon extends Building {
             } 
         }*/
 
-        if (getAttackTarget(me.visionRadiusSquared) != null && rc.getTeamLeadAmount(myTeam) > 30 && rc.getRoundNum()>solfierRound) {
+        if (getAttackTarget(me.visionRadiusSquared) != null && rc.getTeamLeadAmount(myTeam) > 30) {
             tryBuildRobot(RobotType.SOLDIER);
             tryRepair();
             return;
@@ -177,7 +177,7 @@ public class Archon extends Building {
             }
         }
 
-        if ((sharedArray.laboratoryBuilderAlive() || rc.getRoundNum()<50) && !hasDangerTargets && (minersSpawned < maxLeadingMiners || (sharedArray.builderNeedsResources() && minersSpawned < 10))) {
+        if ((sharedArray.laboratoryBuilderAlive() || rc.getRoundNum()<50) && !hasDangerTargets && (minersSpawned < maxLeadingMiners || (sharedArray.builderNeedsResources() || rc.getRoundNum()>100))) {
             if (tryBuildRobot(RobotType.MINER)) {
                 minersSpawned++;
             }
@@ -188,18 +188,20 @@ public class Archon extends Building {
         }
 
         if ((rc.getTeamLeadAmount(myTeam) < 600 && rc.getHealth()>800) || hasDangerTargets) {
-             while (spawnOrder[spawnOrderIndex] == RobotType.BUILDER && (turnIndex != 0 || sharedArray.laboratoryBuilderAlive()) || (spawnOrder[spawnOrderIndex] == RobotType.SOLDIER && rc.getRoundNum() < solfierRound)) {
+             while (spawnOrder[spawnOrderIndex] == RobotType.BUILDER && (turnIndex != 0 || sharedArray.laboratoryBuilderAlive() || rc.getRoundNum()>200) || (spawnOrder[spawnOrderIndex] == RobotType.SOLDIER && !isSoldierSpawner)) {
                 spawnOrderIndex = (spawnOrderIndex + 1) % spawnOrder.length;
             }
         }
         
-        
+        if((spawnOrder[spawnOrderIndex] == RobotType.MINER && minersSpawned<20) || spawnOrder[spawnOrderIndex] != RobotType.MINER)
         if (tryBuildRobot(spawnOrder[spawnOrderIndex])) {
             spawnOrderIndex = (spawnOrderIndex + 1) % spawnOrder.length;
         
 
-    }
-        //tryBuildRobot(RobotType.SAGE);
+        }
+        if(isSoldierSpawner){
+        tryBuildRobot(RobotType.SOLDIER);
+        }
         tryRepair();
     }
 

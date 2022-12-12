@@ -36,11 +36,6 @@ public class Miner extends Droid {
             return;
         }
 
-        if (tryMine(rc.senseNearbyLocationsWithLead(2), this::senseLead, this::tryMineLead)) {
-            tryMineLeadAllDirections();
-            return;
-        }
-
         if (tryMine(rc.senseNearbyLocationsWithLead(me.visionRadiusSquared), this::senseLead, this::tryMineLead)) {
             tryMineLeadAllDirections();
             return;

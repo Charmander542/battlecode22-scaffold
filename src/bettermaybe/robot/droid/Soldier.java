@@ -19,7 +19,7 @@ public class Soldier extends Droid {
         lookForDangerTargets();
 
         int myHealth = rc.getHealth();
-        if (myHealth < 10 || (myHealth < 16 && distanceToArchon() < 34) || rc.getRoundNum()<150) {
+        if (myHealth < 10 || (myHealth < 16 && distanceToArchon() < 34) || rc.getRoundNum()<200) {
             tryMoveToArchon();
         }
 

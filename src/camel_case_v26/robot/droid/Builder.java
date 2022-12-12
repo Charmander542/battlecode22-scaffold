@@ -1,4 +1,4 @@
-package bettermaybe.robot.droid;
+package camel_case_v26.robot.droid;
 
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -7,7 +7,7 @@ import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotMode;
 import battlecode.common.RobotType;
-import bettermaybe.dijkstra.Dijkstra20;
+import camel_case_v26.dijkstra.Dijkstra20;
 
 public class Builder extends Droid {
     private MapLocation archonLocation = null;
@@ -140,7 +140,7 @@ public class Builder extends Droid {
                 rc.buildRobot(RobotType.LABORATORY, bestDirection);
                 labsBuilt++;
             } else {
-                if (labsBuilt < 1) {
+                if (labsBuilt < Math.ceil(((double) rc.getRoundNum() - labStartRound) / 300.0)) {
                     sharedArray.markBuilderNeedsResources();
                 }
 

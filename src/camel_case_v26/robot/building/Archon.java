@@ -1,4 +1,4 @@
-package bettermaybe.robot.building;
+package camel_case_v26.robot.building;
 
 import battlecode.common.AnomalyScheduleEntry;
 import battlecode.common.AnomalyType;
@@ -9,15 +9,14 @@ import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotMode;
 import battlecode.common.RobotType;
-import bettermaybe.dijkstra.Dijkstra34;
-import bettermaybe.util.Utils;
+import camel_case_v26.dijkstra.Dijkstra34;
+import camel_case_v26.util.RandomUtils;
+import camel_case_v26.util.SharedArray;
 
 public class Archon extends Building {
     private Direction[] spawnDirections;
 
     private boolean isFirstRun = true;
-    private boolean isSoldierSpawner = false;
-    private MapLocation borderLocation = null;
 
     private MapLocation optimalLocation = null;
     private boolean hasFoundInitialOptimalLocation = false;
@@ -26,19 +25,13 @@ public class Archon extends Building {
 
     private int minersSpawned = 0;
     private int maxLeadingMiners;
-    private int firstMovingRound = 15;
-    private int solfierRound = 50;
 
     private RobotType[] spawnOrder = {
-            RobotType.SOLDIER,
-            RobotType.SOLDIER,
-            RobotType.SOLDIER,
             RobotType.BUILDER,
+            RobotType.SOLDIER,
+            RobotType.SOLDIER,
             RobotType.MINER
-            
     };
-
-    private boolean isMoving = false;
 
     private int spawnOrderIndex = 0;
 
@@ -52,53 +45,6 @@ public class Archon extends Building {
     public void run() throws GameActionException {
         super.run();
 
-        if (borderLocation == null) {
-            MapLocation myLocation = rc.getLocation();
-            MapLocation center = new MapLocation(mapWidth / 2, mapHeight / 2);
-
-            /*switch (directionBetween(center, myLocation)) {
-                case NORTHEAST:
-                    borderLocation = new MapLocation(mapWidth - 1, mapHeight - 1);
-                    break;
-                case SOUTHEAST:
-                    borderLocation = new MapLocation(mapWidth - 1, 0);
-                    break;
-                case SOUTHWEST:
-                    borderLocation = new MapLocation(0, 0);
-                    break;
-                case NORTHWEST:
-                default:
-                    borderLocation = new MapLocation(0, mapHeight - 1);
-            }*/
-
-            switch (center.directionTo(myLocation)) {
-                case NORTH:
-                    borderLocation = new MapLocation(mapWidth / 2, mapHeight - 1);
-                    break;
-                case NORTHEAST:
-                    borderLocation = new MapLocation(mapWidth - 1, mapHeight - 1);
-                    break;
-                case EAST:
-                    borderLocation = new MapLocation(mapWidth - 1, mapHeight / 2);
-                    break;
-                case SOUTHEAST:
-                    borderLocation = new MapLocation(mapWidth - 1, 0);
-                    break;
-                case SOUTH:
-                    borderLocation = new MapLocation(mapWidth / 2, 0);
-                    break;
-                case SOUTHWEST:
-                    borderLocation = new MapLocation(0, 0);
-                    break;
-                case WEST:
-                    borderLocation = new MapLocation(0, mapHeight / 2);
-                    break;
-                case NORTHWEST:
-                default:
-                    borderLocation = new MapLocation(0, mapHeight - 1);
-            }
-        }
-
         int turnIndex = sharedArray.getArchonTurnIndex();
         int archonCount = rc.getArchonCount();
 
@@ -111,15 +57,12 @@ public class Archon extends Building {
                     knownArchonLocations++;
                 }
             }
-            if(knownArchonLocations>1){
-                isMoving = true;
-            }
 
             if (knownArchonLocations == rc.getArchonCount()) {
                 setPossibleEnemyArchonLocations();
             }
 
-            maxLeadingMiners = Math.max(rc.senseNearbyLocationsWithLead(2).length, 8);
+            maxLeadingMiners = Math.max(rc.senseNearbyLocationsWithLead(2).length, 5);
 
             isFirstRun = false;
         }
@@ -130,6 +73,15 @@ public class Archon extends Building {
 
         lookForDangerTargets();
 
+        if (rc.getMode() == RobotMode.PORTABLE) {
+            if (getAttackTarget(me.visionRadiusSquared) != null) {
+                tryTransform();
+            } else {
+                tryMoveToOptimalLocation();
+            }
+
+            return;
+        }
 
         boolean checkForInitialOptimalLocation = false;
         if (!hasFoundInitialOptimalLocation) {
@@ -144,62 +96,63 @@ public class Archon extends Building {
             findOptimalLocation();
         }
 
-        /*if(rc.getRoundNum()>firstMovingRound && rc.getRoundNum()<100 && isMoving){
-            if(rc.isTransformReady() && rc.getMode().equals(RobotMode.TURRET) && rc.canTransform()){
-                rc.transform();
-            }
-
-            if (rc.getMode().equals(RobotMode.PORTABLE)) {
-                tryWanderSafe();
-            }
-        }else{
-            if(rc.isTransformReady() && rc.getMode().equals(RobotMode.PORTABLE) && rc.canTransform()){
-                rc.transform();
-            } 
-        }*/
-
-        if (getAttackTarget(me.visionRadiusSquared) != null && rc.getTeamLeadAmount(myTeam) > 30 && rc.getRoundNum()>solfierRound) {
+        RobotInfo attackTarget = getAttackTarget(me.visionRadiusSquared);
+        if (attackTarget != null && attackTarget.type.canAttack()) {
             tryBuildRobot(RobotType.SOLDIER);
+            tryBuildRobot(RobotType.SAGE);
             tryRepair();
             return;
         }
 
-        if (rc.getRoundNum() > 1 && !Utils.chance(((double) turnIndex + 1) / (double) archonCount)) {
+        if (sharedArray.builderNeedsResources()) {
+            tryBuildRobot(RobotType.SAGE);
+            tryMoveToOptimalLocation();
+            tryRepair();
+            return;
+        }
+
+        if (sharedArray.laboratoryBuilderAlive() && sharedArray.needMiners()) {
+            tryBuildRobot(RobotType.MINER);
+            tryMoveToOptimalLocation();
+            tryRepair();
+            return;
+        }
+
+        if (rc.getRoundNum() > 1 && !RandomUtils.chance(((double) turnIndex + 1) / (double) archonCount)) {
+            tryBuildRobot(RobotType.SAGE);
+            tryMoveToOptimalLocation();
             tryRepair();
             return;
         }
 
         boolean hasDangerTargets = false;
-        for (int i = 0; i < Utils.MAX_DANGER_TARGETS; i++) {
+        for (int i = 0; i < SharedArray.MAX_DANGER_TARGETS; i++) {
             if (sharedArray.getDangerTarget(i) != null) {
                 hasDangerTargets = true;
                 break;
             }
         }
 
-        if ((sharedArray.laboratoryBuilderAlive() || rc.getRoundNum()<50) && !hasDangerTargets && (minersSpawned < maxLeadingMiners || (sharedArray.builderNeedsResources() && minersSpawned < 10))) {
+        if (!hasDangerTargets && minersSpawned < maxLeadingMiners) {
             if (tryBuildRobot(RobotType.MINER)) {
                 minersSpawned++;
             }
 
-            //tryBuildRobot(RobotType.SAGE);
+            tryBuildRobot(RobotType.SAGE);
             tryRepair();
             return;
         }
 
-        if ((rc.getTeamLeadAmount(myTeam) < 600 && rc.getHealth()>800) || hasDangerTargets) {
-             while (spawnOrder[spawnOrderIndex] == RobotType.BUILDER && (turnIndex != 0 || sharedArray.laboratoryBuilderAlive()) || (spawnOrder[spawnOrderIndex] == RobotType.SOLDIER && rc.getRoundNum() < solfierRound)) {
-                spawnOrderIndex = (spawnOrderIndex + 1) % spawnOrder.length;
-            }
+        while (spawnOrder[spawnOrderIndex] == RobotType.BUILDER && (turnIndex != 0 || sharedArray.laboratoryBuilderAlive())) {
+            spawnOrderIndex = (spawnOrderIndex + 1) % spawnOrder.length;
         }
-        
-        
+
         if (tryBuildRobot(spawnOrder[spawnOrderIndex])) {
             spawnOrderIndex = (spawnOrderIndex + 1) % spawnOrder.length;
-        
+        }
 
-    }
-        //tryBuildRobot(RobotType.SAGE);
+        tryBuildRobot(RobotType.SAGE);
+        tryMoveToOptimalLocation();
         tryRepair();
     }
 
@@ -270,9 +223,7 @@ public class Archon extends Building {
             }
         }
 
-        if (bestDirection != null) {
-            if(type == RobotType.MINER && (minersSpawned>=10 && rc.getRoundNum()<300)) return false;
-            if(type == RobotType.MINER) minersSpawned++;
+        if (bestDirection != null && rc.canBuildRobot(type, bestDirection)) {
             rc.buildRobot(type, bestDirection);
             return true;
         }
@@ -285,11 +236,25 @@ public class Archon extends Building {
             return;
         }
 
-        RobotInfo repairTarget = getRepairTarget(me.actionRadiusSquared);
-        if (repairTarget != null
-                && repairTarget.health < repairTarget.type.getMaxHealth(repairTarget.level)
-                && rc.canRepair(repairTarget.location)) {
-            rc.repair(repairTarget.location);
+        RobotInfo bestTarget = null;
+        int minHealth = Integer.MAX_VALUE;
+
+        for (RobotInfo robot : rc.senseNearbyRobots(me.actionRadiusSquared, myTeam)) {
+            if (!rc.canRepair(robot.location)
+                    || robot.type.isBuilding()
+                    || !robot.type.canAttack()
+                    || robot.health == robot.type.getMaxHealth(robot.level)) {
+                continue;
+            }
+
+            if (robot.health < minHealth) {
+                bestTarget = robot;
+                minHealth = robot.health;
+            }
+        }
+
+        if (bestTarget != null && rc.canRepair(bestTarget.location)) {
+            rc.repair(bestTarget.location);
         }
     }
 
@@ -339,6 +304,26 @@ public class Archon extends Building {
         return false;
     }
 
+    private void tryMoveToOptimalLocation() throws GameActionException {
+        if (optimalLocation == null) {
+            return;
+        }
+
+        if (rc.getLocation().equals(optimalLocation)) {
+            if (rc.getMode() == RobotMode.PORTABLE) {
+                tryTransform();
+            }
+        } else {
+            if (rc.getMode() == RobotMode.PORTABLE) {
+                tryMoveTo(optimalLocation);
+                sharedArray.setMyArchonLocation(sharedArray.archonIdToIndex(rc.getID()), rc.getLocation());
+                setSpawnDirections();
+            } else {
+                tryTransform();
+            }
+        }
+    }
+
     private double getSpawnRubble(MapLocation location) throws GameActionException {
         double score = 0.0;
 
@@ -375,13 +360,5 @@ public class Archon extends Building {
         }
 
         return score;
-    }
-
-    private void tryWanderSafe() throws GameActionException {
-        if (rc.getLocation().distanceSquaredTo(borderLocation) < 20) {
-            tryMoveRandom();
-        } else {
-            tryMoveTo(borderLocation);
-        }
     }
 }

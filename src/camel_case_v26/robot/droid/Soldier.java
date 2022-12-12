@@ -1,15 +1,15 @@
-package bettermaybe.robot.droid;
+package camel_case_v26.robot.droid;
 
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
-import bettermaybe.dijkstra.Dijkstra20;
+import camel_case_v26.dijkstra.Dijkstra20;
 
-public class Sage extends Droid {
-    public Sage(RobotController rc) {
-        super(rc, RobotType.SAGE, new Dijkstra20(rc));
+public class Soldier extends Droid {
+    public Soldier(RobotController rc) {
+        super(rc, RobotType.SOLDIER, new Dijkstra20(rc));
     }
 
     @Override
@@ -29,7 +29,6 @@ public class Sage extends Droid {
                 && !rc.isActionReady()
                 && rc.getHealth() != me.getMaxHealth(rc.getLevel())) {
             tryMoveToSafety();
-            return;
         }
 
         RobotInfo attackTarget = getAttackTarget(me.actionRadiusSquared);
@@ -57,40 +56,8 @@ public class Sage extends Droid {
         tryWander();
     }
 
-    private boolean tryMoveToAndAttack(MapLocation location) throws GameActionException {
-        if (location == null) {
-            return false;
-        }
-
-        tryMoveTo(location);
-
-        if (rc.canSenseLocation(location)) {
-            RobotInfo robot = rc.senseRobotAtLocation(location);
-            if (robot != null) {
-                tryAttack(robot);
-            }
-        }
-
-        return true;
-    }
-
     private int distanceToArchon() throws GameActionException {
-        MapLocation myLocation = rc.getLocation();
-
-        int minDistance = Integer.MAX_VALUE;
-
-        for (int i = 0; i < 5; i++) {
-            MapLocation archon = sharedArray.getMyArchonLocation(i);
-            if (archon == null) {
-                continue;
-            }
-
-            int distance = myLocation.distanceSquaredTo(archon);
-            if (distance < minDistance) {
-                minDistance = distance;
-            }
-        }
-
-        return minDistance;
+        MapLocation archon = getClosestArchon();
+        return archon != null ? rc.getLocation().distanceSquaredTo(archon) : Integer.MAX_VALUE;
     }
 }

@@ -1,4 +1,4 @@
-package bettermaybe.robot.droid;
+package camel_case_v26.robot.droid;
 
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -6,8 +6,8 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
-import bettermaybe.dijkstra.Dijkstra20;
-import bettermaybe.util.BattlecodeFunction;
+import camel_case_v26.dijkstra.Dijkstra20;
+import camel_case_v26.util.BattlecodeFunction;
 
 import java.util.Arrays;
 
@@ -21,6 +21,8 @@ public class Miner extends Droid {
         super.run();
 
         lookForDangerTargets();
+
+        sharedArray.markMinerAlive();
 
         RobotInfo visibleTarget = getAttackTarget(me.visionRadiusSquared);
         if (visibleTarget != null
@@ -186,25 +188,5 @@ public class Miner extends Droid {
                 rc.mineLead(location);
             }
         }
-    }
-
-    private int distanceToArchon() throws GameActionException {
-        MapLocation myLocation = rc.getLocation();
-
-        int minDistance = Integer.MAX_VALUE;
-
-        for (int i = 0; i < 5; i++) {
-            MapLocation archon = sharedArray.getMyArchonLocation(i);
-            if (archon == null) {
-                continue;
-            }
-
-            int distance = myLocation.distanceSquaredTo(archon);
-            if (distance < minDistance) {
-                minDistance = distance;
-            }
-        }
-
-        return minDistance;
     }
 }

@@ -1,9 +1,9 @@
-package bettermaybe.robot.building;
+package camel_case_v26.robot.building;
 
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 import battlecode.common.RobotType;
-import bettermaybe.dijkstra.Dijkstra53;
+import camel_case_v26.dijkstra.Dijkstra53;
 
 public class Laboratory extends Building {
     public Laboratory(RobotController rc) {
@@ -14,9 +14,8 @@ public class Laboratory extends Building {
     public void run() throws GameActionException {
         super.run();
 
-        if (!sharedArray.builderNeedsResources() && rc.canTransmute() && rc.getTeamLeadAmount(rc.getTeam())>600) {
+        if (!sharedArray.builderNeedsResources() && rc.canTransmute()) {
             rc.transmute();
         }
     }
-    
 }

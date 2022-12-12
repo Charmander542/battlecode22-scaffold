@@ -1,4 +1,4 @@
-package bettermaybe.robot;
+package camel_case_v26.robot;
 
 import battlecode.common.AnomalyType;
 import battlecode.common.Direction;
@@ -8,8 +8,10 @@ import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
-import bettermaybe.dijkstra.Dijkstra;
-import bettermaybe.util.Utils;
+import camel_case_v26.dijkstra.Dijkstra;
+import camel_case_v26.util.ArrayUtils;
+import camel_case_v26.util.RandomUtils;
+import camel_case_v26.util.SharedArray;
 
 public abstract class Robot {
     protected RobotController rc;
@@ -21,7 +23,7 @@ public abstract class Robot {
     protected int mapWidth;
     protected int mapHeight;
 
-    protected Utils sharedArray;
+    protected SharedArray sharedArray;
 
     private Dijkstra dijkstra;
 
@@ -64,7 +66,7 @@ public abstract class Robot {
         mapWidth = rc.getMapWidth();
         mapHeight = rc.getMapHeight();
 
-        sharedArray = new Utils(rc);
+        sharedArray = new SharedArray(rc);
 
         this.dijkstra = dijkstra;
     }
@@ -106,6 +108,8 @@ public abstract class Robot {
                 }
             }
 
+            boolean didAttack = false;
+
             if (rc.canEnvision(AnomalyType.CHARGE)) {
                 int chargeDamage = 0;
 
@@ -116,39 +120,20 @@ public abstract class Robot {
                 }
 
                 if (chargeDamage > me.damage) {
-                    System.out.println("Charge");                   
                     rc.envision(AnomalyType.CHARGE);
-                }if (rc.canAttack(robot.location)) {
-                    rc.attack(robot.location);
+                    didAttack = true;
                 }
             }
 
-            if (rc.canEnvision(AnomalyType.FURY)) {
-                int furyDamage = 0;
-
-                for (RobotInfo enemyRobot : rc.senseNearbyRobots(me.actionRadiusSquared, enemyTeam)) {
-                    if (enemyRobot.type.isBuilding()) {
-                        furyDamage += Math.min(enemyRobot.health, Math.floor((double) enemyRobot.type.getMaxHealth(enemyRobot.level) / 100.0 * 22.0));
-                    }
-                }
-
-                if (furyDamage > me.damage) {
-                    System.out.println("Fury");
-                    rc.envision(AnomalyType.FURY);
-                }if (rc.canAttack(robot.location)) {
-                    rc.attack(robot.location);
-                }
-            } 
-            
-
-            if (rc.canAttack(robot.location)) {
+            if (!didAttack && rc.canAttack(robot.location)) {
                 rc.attack(robot.location);
+                didAttack = true;
+            }
 
-                if (robot.type == RobotType.ARCHON) {
-                    RobotInfo newRobot = rc.senseRobotAtLocation(robot.location);
-                    if (newRobot == null || newRobot.team == myTeam || newRobot.type != RobotType.ARCHON) {
-                        sharedArray.setEnemyArchonLocation(sharedArray.archonIdToIndex(robot.ID), null);
-                    }
+            if (didAttack && robot.type == RobotType.ARCHON) {
+                RobotInfo newRobot = rc.senseRobotAtLocation(robot.location);
+                if (newRobot == null || newRobot.team == myTeam || newRobot.type != RobotType.ARCHON) {
+                    sharedArray.setEnemyArchonLocation(sharedArray.archonIdToIndex(robot.ID), null);
                 }
             }
 
@@ -163,19 +148,11 @@ public abstract class Robot {
     }
 
     protected RobotInfo getAttackTarget(int radius) {
-        return getAttackTarget(radius, enemyTeam);
-    }
-
-    protected RobotInfo getRepairTarget(int radius) {
-        return getAttackTarget(radius, myTeam);
-    }
-
-    private RobotInfo getAttackTarget(int radius, Team targetTeam) {
         RobotInfo bestTarget = null;
         int minHealth = Integer.MAX_VALUE;
         int maxPriority = Integer.MIN_VALUE;
 
-        for (RobotInfo robot : rc.senseNearbyRobots(radius, targetTeam)) {
+        for (RobotInfo robot : rc.senseNearbyRobots(radius, enemyTeam)) {
             int priority = attackPriorities[robot.type.ordinal()];
             if (bestTarget == null
                     || priority > maxPriority
@@ -351,7 +328,7 @@ public abstract class Robot {
     }
 
     protected boolean tryMoveRandom() throws GameActionException {
-        for (Direction direction : Utils.shuffle(adjacentDirections.clone())) {
+        for (Direction direction : ArrayUtils.shuffle(adjacentDirections.clone())) {
             if (tryMove(direction)) {
                 return true;
             }
@@ -362,7 +339,7 @@ public abstract class Robot {
 
     protected boolean tryWander() throws GameActionException {
         if (wanderQuadrants == null) {
-            wanderQuadrants = Utils.shuffle(new Direction[]{
+            wanderQuadrants = ArrayUtils.shuffle(new Direction[]{
                     Direction.NORTHEAST,
                     Direction.NORTHWEST,
                     Direction.SOUTHEAST,
@@ -407,7 +384,7 @@ public abstract class Robot {
                     break;
             }
 
-            currentWanderTarget = new MapLocation(Utils.nextInt(minX, maxX), Utils.nextInt(minY, maxY));
+            currentWanderTarget = new MapLocation(RandomUtils.nextInt(minX, maxX), RandomUtils.nextInt(minY, maxY));
             return tryWander();
         }
 
@@ -497,5 +474,22 @@ public abstract class Robot {
         }
 
         return closestArchon;
+    }
+
+    protected boolean tryMoveToAndAttack(MapLocation location) throws GameActionException {
+        if (location == null) {
+            return false;
+        }
+
+        tryMoveTo(location);
+
+        if (rc.canSenseLocation(location)) {
+            RobotInfo robot = rc.senseRobotAtLocation(location);
+            if (robot != null) {
+                tryAttack(robot);
+            }
+        }
+
+        return true;
     }
 }

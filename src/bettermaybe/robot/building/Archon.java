@@ -34,6 +34,7 @@ public class Archon extends Building {
             RobotType.SOLDIER,
             RobotType.SOLDIER,
             RobotType.BUILDER,
+            //RobotType.SAGE
             RobotType.MINER
             
     };
@@ -119,7 +120,7 @@ public class Archon extends Building {
                 setPossibleEnemyArchonLocations();
             }
 
-            maxLeadingMiners = Math.max(rc.senseNearbyLocationsWithLead(2).length, 8);
+            maxLeadingMiners = Math.max(rc.senseNearbyLocationsWithLead(2).length, 5);
 
             isFirstRun = false;
         }
@@ -177,7 +178,7 @@ public class Archon extends Building {
             }
         }
 
-        if ((sharedArray.laboratoryBuilderAlive() || rc.getRoundNum()<50) && !hasDangerTargets && (minersSpawned < maxLeadingMiners || (sharedArray.builderNeedsResources() || rc.getRoundNum()>100))) {
+        if ((sharedArray.laboratoryBuilderAlive() || rc.getRoundNum()<50) && !hasDangerTargets && (minersSpawned < maxLeadingMiners || (sharedArray.builderNeedsResources() || minersSpawned < 30))) {
             if (tryBuildRobot(RobotType.MINER)) {
                 minersSpawned++;
             }
@@ -187,19 +188,24 @@ public class Archon extends Building {
             return;
         }
 
-        if ((rc.getTeamLeadAmount(myTeam) < 600 && rc.getHealth()>800) || hasDangerTargets) {
-             while (spawnOrder[spawnOrderIndex] == RobotType.BUILDER && (turnIndex != 0 || sharedArray.laboratoryBuilderAlive() || rc.getRoundNum()>200) || (spawnOrder[spawnOrderIndex] == RobotType.SOLDIER && !isSoldierSpawner)) {
+        if((rc.getHealth()<700 && !hasDangerTargets) || (sharedArray.laboratoryBuilderAlive() && rc.getRoundNum()>150)){
+            tryBuildRobot(RobotType.BUILDER);
+        }
+
+        if (rc.getTeamLeadAmount(myTeam) < 600 || hasDangerTargets) {
+             while ((spawnOrder[spawnOrderIndex] == RobotType.BUILDER && ((turnIndex != 0 || sharedArray.laboratoryBuilderAlive()) || rc.getRoundNum()<150)) || (spawnOrder[spawnOrderIndex] == RobotType.SOLDIER && !isSoldierSpawner)) {
                 spawnOrderIndex = (spawnOrderIndex + 1) % spawnOrder.length;
             }
         }
         
-        if((spawnOrder[spawnOrderIndex] == RobotType.MINER && minersSpawned<20) || spawnOrder[spawnOrderIndex] != RobotType.MINER)
+        System.out.print(spawnOrder[spawnOrderIndex]);
+        if((spawnOrder[spawnOrderIndex] == RobotType.MINER && minersSpawned<30) || spawnOrder[spawnOrderIndex] != RobotType.MINER){
         if (tryBuildRobot(spawnOrder[spawnOrderIndex])) {
             spawnOrderIndex = (spawnOrderIndex + 1) % spawnOrder.length;
-        
-
         }
-        if(isSoldierSpawner){
+    }
+        if(isSoldierSpawner || rc.getTeamLeadAmount(myTeam)>350 || rc.getArchonCount()==1){
+        tryBuildRobot(RobotType.SAGE);
         tryBuildRobot(RobotType.SOLDIER);
         }
         tryRepair();

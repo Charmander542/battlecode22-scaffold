@@ -34,14 +34,11 @@ public strictfp class RobotPlayer {
                         break;
                 }
             } catch (GameActionException e) {
-                System.out.println(rc.getType() + " Exception");
-                e.printStackTrace();
+                //e.printStackTrace();
             } catch (NullPointerException e) {
-                System.out.println(rc.getType() + " Exception");
-                e.printStackTrace();
+                //e.printStackTrace();
             } catch (Exception e) {
-                System.out.println(rc.getType() + " Exception");
-                e.printStackTrace();
+                //e.printStackTrace();
                 // rc.resign(); // ! For debugging purposes only!
             } finally {
                 Clock.yield();

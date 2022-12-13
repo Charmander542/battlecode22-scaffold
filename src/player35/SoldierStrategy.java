@@ -183,7 +183,7 @@ strictfp class SoldierStrategy {
                         }
 
                     } else {
-                        System.out.println("Couldnt find retreat target");
+                        //System.out.println("Couldnt find retreat target");
                     }
                 } else { // We are self-destructing
                     MapLocation nearestFreeTile = Targeting.findNearestEmptyTile(rc, me);

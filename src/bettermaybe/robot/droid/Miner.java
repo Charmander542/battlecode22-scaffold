@@ -31,7 +31,7 @@ public class Miner extends Droid {
             return;
         }
 
-        if (tryMine(rc.senseNearbyLocationsWithGold(1), this::senseGold, this::tryMineGold)) {
+        if (tryMine(rc.senseNearbyLocationsWithGold(2), this::senseGold, this::tryMineGold)) {
             tryMineLeadAllDirections();
             return;
         }

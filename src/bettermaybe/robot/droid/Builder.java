@@ -136,7 +136,7 @@ public class Builder extends Droid {
         }
 
         if (bestDirection != null) {
-            if (rc.canBuildRobot(RobotType.LABORATORY, bestDirection)) {
+            if (rc.canBuildRobot(RobotType.LABORATORY, bestDirection) && labsBuilt<1) {
                 rc.buildRobot(RobotType.LABORATORY, bestDirection);
                 labsBuilt++;
             } else {
@@ -198,7 +198,7 @@ public class Builder extends Droid {
         }
 
         if (bestDirection != null) {
-            rc.buildRobot(RobotType.WATCHTOWER, bestDirection);
+            //rc.buildRobot(RobotType.WATCHTOWER, bestDirection);
         }
 
         tryWander();
